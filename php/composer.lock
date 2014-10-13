@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/videlalvaro/php-amqplib.git",
-                "reference": "ff176752418dcdb2659fba5e6c76bfb576714199"
+                "reference": "58044157b30853a1a425e26e9ff9895247668ac3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/videlalvaro/php-amqplib/zipball/ff176752418dcdb2659fba5e6c76bfb576714199",
-                "reference": "ff176752418dcdb2659fba5e6c76bfb576714199",
+                "url": "https://api.github.com/repos/videlalvaro/php-amqplib/zipball/58044157b30853a1a425e26e9ff9895247668ac3",
+                "reference": "58044157b30853a1a425e26e9ff9895247668ac3",
                 "shasum": ""
             },
             "require": {
@@ -57,7 +57,7 @@
                 "queue",
                 "rabbitmq"
             ],
-            "time": "2014-09-22 15:12:43"
+            "time": "2014-10-06 11:00:55"
         }
     ],
     "packages-dev": [
