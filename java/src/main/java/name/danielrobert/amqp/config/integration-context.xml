@@ -27,18 +27,25 @@
 	</int:channel>
 	
 	<int:logging-channel-adapter id="errorLogger" level="INFO" logger-name="STDERR" />
-
-	<int-amqp:inbound-channel-adapter channel="clicksIn" queue-names="${mq.queue.clicksIn.name:clicks_in}" connection-factory="amqpConnectionFactory" />
-
-<!-- 	<int-amqp:inbound-gateway request-channel="clicksIn" queue-names="${mq.queue.clicksIn.name:clicks_in}" connection-factory="amqpConnectionFactory" /> -->
-	<int-amqp:outbound-channel-adapter channel="clicksOut" amqp-template="amqpTemplate" routing-key="${mq.queue.clicksOut.name:clicks_out}" />
 	
+	<!-- acts as both a Filter and a Transformer -->
 	<bean id="clickHandler" class="name.danielrobert.amqp.NinetiesClickHandler" />
+
+	<int-amqp:inbound-channel-adapter id="incomingClick" channel="clicksIn" queue-names="${mq.queue.clicksIn.name:clicks_in}" connection-factory="amqpConnectionFactory" />
 	
-	<int:service-activator input-channel="clicksIn" ref="clickHandler" method="processClick" output-channel="clicksOut" />
+	<int:chain id="incomingClicksChain" input-channel="clicksIn" output-channel="clicksOut">
+		<!-- 'id' will actually be prepended by chain id when nested" -->
+		<int:filter ref="clickHandler" method="isAClick" />
+		<int:transformer ref="clickHandler" method="processClick" />
+	</int:chain>
 	
-<!-- 	<int:gateway default-reply-channel="clicksOut" default-request-channel="clicksIn" service-interface="name.danielrobert.amqp.ClickHandler"> -->
-<!-- 		<int:method name="processClick" /> -->
-<!-- 	</int:gateway> -->
+	<int:chain id="outgoingClicksChain" input-channel="clicksOut">
+		<int:transformer ref="clickHandler" method="tagClick" />
+		<int-amqp:outbound-channel-adapter amqp-template="amqpTemplate" routing-key="${mq.queue.clicksOut.name:clicks_out}" />	
+	</int:chain>
+	
+	
+<!-- 	<int:service-activator input-channel="clicksIn" ref="clickHandler" method="processClick" output-channel="clicksOut" /> -->
+	
 
 </beans>

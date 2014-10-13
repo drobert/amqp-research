@@ -8,6 +8,14 @@
 *.war
 *.ear
 
+# eclipse java project files
+.project
+.settings
+.classpath
+
+# maven project files
+target
+
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 
