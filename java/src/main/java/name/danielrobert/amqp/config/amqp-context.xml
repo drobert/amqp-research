@@ -14,7 +14,7 @@
 	<rabbit:connection-factory id="amqpConnectionFactory" />
 	<rabbit:admin connection-factory="amqpConnectionFactory"/>
 	<rabbit:queue id="queueClicksIn" name="${mq.queue.clicksIn.name:clicks_in}" />
-	<rabbit:queue id="queueClicksOut" name="${mq.queue.clicksOut.name:clicks_out}" />
-	<rabbit:template id="amqpTemplate" connection-factory="amqpConnectionFactory" />
+	
+	<rabbit:template id="amqpTemplate" connection-factory="amqpConnectionFactory" exchange="${mq.exchange.clicks.name:danielrobert.amqpresearch.clicks}" />
 	
 </beans>

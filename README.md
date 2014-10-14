@@ -7,22 +7,25 @@ UPDATE 2014-10-13: Added Gearman support
 
 ## Requirements
 
+### RabbitMQ
+
+# Install RabbitMQ
+# Install 'admin ui' plugin
+# Create durable exchange 'danielrobert.amqpresearch.clicks'
+# Create durable queues 'clicks_in' and 'clicks_out'
+# Add routing to the exchange such that 'click.raw.#' routes to 'clicks_in' and 'click.billable.#' route to 'clicks_out'
+
 ### Java
 
-Install RabbitMQ and the admin ui plugin
-Create queues 'clicks_in' and 'clicks_out'
-
-Must have java and maven installed
+Ensure java 7+ and maven 3+ are installed and on the classpath
 
 ### PHP
 
-Must have PHP 5.3+
-App requires Composer (bundled)
-App requires Gearman pecl extension
+Must have PHP 5.3+ with gearman pecl extension
 
 Run:
-> php composer.phar update
-> php composer.phar install
+* > php composer.phar install
+* > php composer.phar update
 
 ### Gearman
 
@@ -34,9 +37,9 @@ Install gearman-job-server (http://gearman.org/getting-started/)
 
 Run the Main.java application in your IDE, or via maven/spring boot:
 
-> mvn spring-boot:run
+* > mvn spring-boot:run
 
-Once running, the application listens for messages in queue 'clicks_in', filters and transforms them, then writes the resulting messages to queue 'clicks_out'
+Once running, the application listens for messages in queue 'clicks_in', filters and transforms them, then writes the resulting messages to the 'danielrobert.amqpresearch.clicks' exchange with routing key 'click.billable', which should ultimately end up in queue 'clicks_out'.
 
 Messages that do not contain the string 'Dobalina' will be ignored. All other strings will end up transformed in the clicks_out queue.
 

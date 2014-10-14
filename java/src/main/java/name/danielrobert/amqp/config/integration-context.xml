@@ -41,11 +41,9 @@
 	
 	<int:chain id="outgoingClicksChain" input-channel="clicksOut">
 		<int:transformer ref="clickHandler" method="tagClick" />
-		<int-amqp:outbound-channel-adapter amqp-template="amqpTemplate" routing-key="${mq.queue.clicksOut.name:clicks_out}" />	
+		<!-- TODO: find a way to use dynamic routing keys by environment and/or partner name/id -->
+		<int-amqp:outbound-channel-adapter amqp-template="amqpTemplate" routing-key="${mq.clicks.out.routingKey:click.billable}"  />	
 	</int:chain>
-	
-	
-<!-- 	<int:service-activator input-channel="clicksIn" ref="clickHandler" method="processClick" output-channel="clicksOut" /> -->
 	
 
 </beans>
