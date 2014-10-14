@@ -9,11 +9,11 @@ UPDATE 2014-10-13: Added Gearman support
 
 ### RabbitMQ
 
-# Install RabbitMQ
-# Install 'admin ui' plugin
-# Create durable exchange 'danielrobert.amqpresearch.clicks'
-# Create durable queues 'clicks_in' and 'clicks_out'
-# Add routing to the exchange such that 'click.raw.#' routes to 'clicks_in' and 'click.billable.#' route to 'clicks_out'
+1. Install RabbitMQ
+2. Install 'admin ui' plugin
+3. Create durable exchange 'danielrobert.amqpresearch.clicks'
+4. Create durable queues 'clicks_in' and 'clicks_out'
+5. Add routing to the exchange such that 'click.raw.#' routes to 'clicks_in' and 'click.billable.#' route to 'clicks_out'
 
 ### Java
 
@@ -24,8 +24,10 @@ Ensure java 7+ and maven 3+ are installed and on the classpath
 Must have PHP 5.3+ with gearman pecl extension
 
 Run:
-* > php composer.phar install
-* > php composer.phar update
+```bash
+php composer.phar install
+php composer.phar update
+```
 
 ### Gearman
 
@@ -37,13 +39,16 @@ Install gearman-job-server (http://gearman.org/getting-started/)
 
 Run the Main.java application in your IDE, or via maven/spring boot:
 
-* > mvn spring-boot:run
+```bash
+mvn spring-boot:run
+```
 
 Once running, the application listens for messages in queue 'clicks_in', filters and transforms them, then writes the resulting messages to the 'danielrobert.amqpresearch.clicks' exchange with routing key 'click.billable', which should ultimately end up in queue 'clicks_out'.
 
 Messages that do not contain the string 'Dobalina' will be ignored. All other strings will end up transformed in the clicks_out queue.
 
 #### To run without PHP support:
+
 Log into your RabbitMQ admin, and post a message into the 'clicks_in' queue with the following properties:
 
 * add Property 'content_type' with value 'text/plain'
@@ -66,11 +71,11 @@ Edit the 'config.php' file before starting to be appropriate for your RabbitMQ i
 To run the CLI:
 
 * start gearman with sqlite3 support:
-> gearmand --verbose=INFO -q libsqlite3 --libsqlite3-db=/tmp/gearman.db
+  * gearmand --verbose=INFO -q libsqlite3 --libsqlite3-db=/tmp/gearman.db
 * start the CLI input listener:
-> php ./runner.php
-** exit by submitting 'q'
+  * php ./runner.php
+  * exit by submitting 'q'
 * start one or more gearman workers
-> php ./gearman_publisher.php
+  * php ./gearman_publisher.php
 
 Note that there are no ordering requirements here other than running gearman first. The runner will submit jobs to gearman and they will wait for workers to be spun up to handle them. Running multiple workers does not cause any race conditions; gearman ensures only one worker receives any job.
