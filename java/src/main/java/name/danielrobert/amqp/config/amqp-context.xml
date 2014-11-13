@@ -11,10 +11,7 @@
 		http://www.springframework.org/schema/rabbit http://www.springframework.org/schema/rabbit/spring-rabbit-1.3.xsd
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-	<rabbit:connection-factory id="amqpConnectionFactory" />
-	<rabbit:admin connection-factory="amqpConnectionFactory"/>
-	<rabbit:queue id="queueClicksIn" name="${mq.queue.clicksIn.name:clicks_in}" />
-	
-	<rabbit:template id="amqpTemplate" connection-factory="amqpConnectionFactory" exchange="${mq.exchange.clicks.name:danielrobert.amqpresearch.clicks}" />
-	
+	<rabbit:connection-factory id="amqpConnectionFactory" host="${mq.host:demo.rabbitmq}" />
+	<rabbit:admin connection-factory="amqpConnectionFactory" />
+
 </beans>
