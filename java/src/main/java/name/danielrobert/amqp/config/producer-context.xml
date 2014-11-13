@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:c="http://www.springframework.org/schema/c"
+	xmlns:int="http://www.springframework.org/schema/integration"
+	xmlns:rabbit="http://www.springframework.org/schema/rabbit"
+	xmlns:int-amqp="http://www.springframework.org/schema/integration/amqp"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:int-file="http://www.springframework.org/schema/integration/file"
+	xsi:schemaLocation="http://www.springframework.org/schema/integration/amqp http://www.springframework.org/schema/integration/amqp/spring-integration-amqp-4.0.xsd
+		http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration-4.0.xsd
+		http://www.springframework.org/schema/integration/file http://www.springframework.org/schema/integration/file/spring-integration-file-4.0.xsd
+		http://www.springframework.org/schema/rabbit http://www.springframework.org/schema/rabbit/spring-rabbit-1.3.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+
+	<context:property-placeholder />
+	<import resource="amqp-context.xml" />
+
+	<!-- analogous to 'JdbcTemplate' or 'RestTemplate' -->
+	<rabbit:template id="etlTemplate" connection-factory="amqpConnectionFactory" exchange="${mq.exchange.etl:etl-demo}" routing-key="prd.demo.etl.producer" />
+	
+	<!-- some custom error handling -->	
+	<int:logging-channel-adapter id="errorLogger" level="INFO" logger-name="STDERR" />
+	
+	<!-- channels are point-to-point or queues. file adapter polls so has to be queued -->
+	<int:channel id="bulk-etl-in" />
+	
+	<!-- this one is point-to-point -->
+	<int:channel id="etl-in" />
+	
+	<!-- 'inbound adapter' takes some source and transforms the event into a Message.
+	     this one looks for new files being added to a 'watched' directory and sends the Message 
+	     through Spring Integration with a payload of java.io.File -->
+	<int-file:inbound-channel-adapter 
+		id="filesIn"
+		directory="${producer.watchdir:/tmp/mqdemo}" 
+		auto-create-directory="true" 
+		channel="bulk-etl-in" 
+		prevent-duplicates="true" 
+		filename-regex="^.*\.etl$">
+		
+		<int:poller fixed-rate="500" />
+	</int-file:inbound-channel-adapter>
+
+	<!-- message handlers don't have to be single-purpose entities. spring integration supports a message handing 'chain' -->
+	<int:chain id="etlInChain" input-channel="bulk-etl-in" output-channel="etl-in">
+<!-- 		<int:splitter expression="#{T(name.danielrobert.amqp.FileSplitter).split()}" /> -->
+		<int:splitter method="split">
+			<bean class="name.danielrobert.amqp.FileSplitter" /> 
+		</int:splitter>
+		<int:filter expression="payload.contains('|')" />
+		<!-- example of turning this into a fully-fledged POJO on the way
+		<int:transformer expression="#{T(name.danielrobert.amqp.EtlExecution).fromMessage()}" />
+		 -->
+	</int:chain>
+
+	<!-- a gateway is line a single-adapter chain. basically, a gateway is the interface between 
+	     Messaging and non-messaging -->	
+	<int-amqp:outbound-gateway id="etlOut" request-channel="etl-in" amqp-template="etlTemplate" requires-reply="false"/>
+	
+</beans>

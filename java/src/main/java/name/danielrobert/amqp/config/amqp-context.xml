@@ -11,7 +11,18 @@
 		http://www.springframework.org/schema/rabbit http://www.springframework.org/schema/rabbit/spring-rabbit-1.3.xsd
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-	<rabbit:connection-factory id="amqpConnectionFactory" host="${mq.host:demo.rabbitmq}" />
 	<rabbit:admin connection-factory="amqpConnectionFactory" />
+	<rabbit:connection-factory id="amqpConnectionFactory" host="${mq.host:demo.rabbitmq}" username="${mq.user:guest}" password="${mq.pass:guest}" />
+	
+	<!-- a queue with no 'name'. will get a randomly-generated queue name/id and die when the application stops, 
+	     but will have exclusive access (no one else can pull messages from this queue) -->
+	<rabbit:queue id="catchAllQueue" name="etl-catch-all-queue" durable="false" exclusive="false" auto-delete="true"/>
+	
+	<rabbit:topic-exchange id="etlExchange" name="${mq.exchange.etl:etl-demo}" auto-delete="true" durable="false">
+		<rabbit:bindings>
+			<!-- adding a 'route all messages here' binding pattern for easy demo-ing -->
+			<rabbit:binding pattern="#" queue="catchAllQueue" />
+		</rabbit:bindings>
+	</rabbit:topic-exchange>
 
 </beans>
